@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="post:\activate:application\json:okta-api-setup-test-config" doc:id="07f92eab-8c24-4b73-83f9-9d783ca611ce" >
+		<choice doc:name="Choice" doc:id="d2036569-90df-46ee-bc79-04e1d358651a" >
+			<when expression="#[!isEmpty(vars.extUserid)]">
+				<flow-ref doc:name="invoke-activate-sub-flow" doc:id="6d595d6f-c303-4d69-b753-71d2dcac4e5e" name="okta-user-lifecycle-activate-Sub_Flow"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="624ee3a3-d3a8-45e6-8aa2-72fe77b28d6c" message="INSIDE ACTIVATE DEFAULT BLOCK ######## #[payload]"/>
+				<set-variable value="#[payload.loginId]" doc:name="Set Variable" doc:id="62c0279a-8952-4d21-91b4-030dd49a3861" variableName="loginId"/>
+				<ee:transform doc:name="Transform Message" doc:id="c80d7d3d-4074-4c9a-8bff-d5cc647f4817" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "credentials": {
+    "password" : 
+    { 
+        "value": payload.password 
+    }
+  }
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<http:request method="POST" doc:name="Request" doc:id="fd1797dd-52b1-438d-a633-0bf346fc1ff4" config-ref="HTTP_Request_configuration-common" path="/users/{loginId}">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	Authorization : "SSWS ${secure::extidpnfo.authkey}"
+}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/json
+---
+{
+	loginId : vars.loginId}]]]></http:uri-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="fbc3259a-de1b-4db3-be38-17285b8a24b4">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "extId" : payload.id,
+  "status" : "success",
+  "description" : "User activation has been complete"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				
+			</otherwise>
+		</choice>
+		<error-handler  ref="okta-commom-error-handlerError_Handler">
+			
+		</error-handler>
+	</flow>
+	<sub-flow name="okta-user-lifecycle-activate-Sub_Flow" doc:id="f4b82277-341c-4e51-8063-a1304ad6a962" >
+		<logger level="INFO" doc:name="Logger" doc:id="2dd4920a-5898-4fec-98a0-160849947ef2" message="Incoming Activate Request  userId ##### : #[vars.extUserId]" />
+		<http:request method="POST" doc:name="Request" doc:id="0ec40f50-f3ad-4ddd-a21c-c0913fe8d161" config-ref="HTTP_Request_configuration-common" path="/users/{userId}/lifecycle/activate?">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	Authorization : "SSWS ${secure::extidpnfo.authkey}"
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	userId : vars.extUserId
+}]]]></http:uri-params>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	sendEmail : false
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="6f89c00e-2576-436f-a9cb-d4cc1a0cb6ec">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "success",
+  description: "User activation has been initiated"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	
+</mule>

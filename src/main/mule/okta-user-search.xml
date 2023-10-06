@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get:\search\(loginid):okta-api-setup-test-config" doc:id="aa7212b8-97e2-4655-b3c1-8dd5971cbf1f" >
+		<logger level="INFO" doc:name="Logger" doc:id="38bf65b6-0cbc-4e60-992d-3d65ff0bac12" message="BEFORE SEARCH #### #[attributes.uriParams.loginid]" />
+		<set-variable value="#[%dw 2.0&#10;output application/json&#10;var loginId = if(!isEmpty(payload)) payload.loginId else attributes.uriParams.loginid&#10;---&#10;loginId]" doc:name="Set Variable" doc:id="6f7972f0-4f79-44c8-a638-71f0e4227306" variableName="loginIdVar"/>
+		<logger level="INFO" doc:name="Logger" doc:id="eca50bf5-a946-44d7-b781-b73bd8a63844" message="Login Value to use ##### #[vars.loginIdVar]"/>
+		<validation:is-email doc:name="Is email" doc:id="77745bbc-da59-46ec-abd6-9a6f10527a0e" config-ref="Validation_Config" email="#[vars.loginIdVar]" message="Login need to be an email only" />
+		<set-variable value='#[%dw 2.0&#10;import * from dw::core::URL&#10;output application/json&#10;---&#10;//encodeURI("profile.login eq \"" ++ vars.loginIdVar ++ "\"")&#10;encodeURI(vars.loginIdVar)]' doc:name="Set Variable" doc:id="0e6974fa-e18f-4020-a4e6-c2f6469bf203" variableName="searchfilterval" />
+		<logger level="INFO" doc:name="Logger1" doc:id="ae57f785-f158-404f-9003-4072ddd13468" message="#### Variable ###: #[vars.searchfilterval]" />
+		<http:request method="GET" doc:name="Request" doc:id="ad07a7c4-b2da-4ab3-817f-a7be56c9738c" config-ref="HTTP_Request_configuration-common" path="/users?">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	Authorization : "SSWS ${secure::extidpnfo.authkey}"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	q : vars.searchfilterval
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="1535326b-8c92-4234-9070-211180361c78" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var res = payload
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	extId : payload01.id,
+	status: payload01.status,
+	created: payload01.created,
+	activated: payload01.activated,
+	statusChanged: payload01.statusChanged,
+	lastLogin: payload01.lastLogin,
+	lastUpdated: payload01.lastUpdated,
+	passwordChanged: payload01.passwordChanged,
+	firstName: payload01.profile.firstName,
+	lastName: payload01.profile.lastName,
+	email: payload01.profile.email,
+	login: payload01.profile.login,
+	mobilePhone: payload01.profile.mobilePhone
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler ref="okta-commom-error-handlerError_Handler"/>
+		
+	</flow>
+</mule>

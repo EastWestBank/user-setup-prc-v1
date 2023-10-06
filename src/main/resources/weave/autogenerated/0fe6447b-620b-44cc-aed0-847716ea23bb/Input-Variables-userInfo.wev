@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_0fe6447b_620b_44cc_aed0_847716ea23bb_Input_Variables_userInfo = Any
+

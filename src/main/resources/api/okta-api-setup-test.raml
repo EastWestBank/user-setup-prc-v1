@@ -1,0 +1,103 @@
+#%RAML 1.0
+title: okta-api-setup-test
+description:  An orchestrated process APIs to setup a customer profiles for Authentication and MFA verification on Okta.
+
+baseUri: https://devopenapi.velobank.com/api/prc/v1/users
+
+types:
+  UserSetupRequestClient: !include resources/user-setup-types-client.raml
+  UserActivateRequestclient: !include resources/user-activation-types-client.raml
+  UserChallengeRequestClient: !include resources/okta-challenge-types.raml
+
+traits:
+  AuthorizationToken: !include resources/okta-user-setup-traits.raml
+  
+/create:
+  description: Use to create user identity record
+  post:
+    is: [AuthorizationToken]
+    body:
+      application/json:
+        type: UserSetupRequestClient
+        example: !include examples/create-user-request-client.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/create-user-response-client.json
+      400:
+        body:
+          application/json:
+            example: !include examples/error-response.json
+
+/search/{loginid}:
+  description: Use to search any user identity record
+  get:
+    is: [AuthorizationToken]
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/search-user-response-client.json
+      400:
+        body:
+          application/json:
+            example: !include examples/error-response.json
+              
+/activate:
+  description: Use to activate user identity record along with password
+  post:
+    is: [AuthorizationToken]
+    body:
+      application/json:
+        type: UserActivateRequestclient
+        example: !include examples/activate-user-request-client.json
+    responses:
+      200:
+        body:
+            application/json:
+                example: !include examples/activate-user-response-client.json
+      400:
+        body:
+          application/json:
+              example: !include examples/error-response.json
+/challenge:
+  description: Use to request mfa based on client mfa type and user login
+  post:
+    is: [AuthorizationToken]
+    body:
+      application/json:
+        type: UserChallengeRequestClient
+        example: !include examples/challenge-factor-request-client.json
+    responses:
+      200:
+        body:
+            application/json:
+                example: !include examples/challenge-factor-response-client.json
+      400:
+        body:
+          application/json:
+              example: !include examples/error-response.json
+
+/verify/{loginid}:
+  description: Use to verify mfa based on factory type coming from client aling with passcode
+  post:
+    is: [AuthorizationToken]
+    body:
+      application/json:
+        type: object
+        properties:
+          passcode:
+            type: string
+            required: true
+        example: !include examples/verify-factor-request-client.json
+    responses:
+      200:
+        body:
+            application/json:
+                example: !include examples/verify-user-response-client.json
+      400:
+        body:
+          application/json:
+              example: !include examples/error-response.json
+          

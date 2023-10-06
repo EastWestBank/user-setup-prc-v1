@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="okta-commom-error-handlerError_Handler" doc:id="3e4ce570-6b9d-4dc2-94e1-bab7de2226b3" >
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+                <set-variable value="INVDATA0001" doc:name="Set-Error-Code" doc:id="1dc9c8c0-f4e7-4387-a430-811b1a7d1f93" variableName="errorcode" />
+				<set-variable value="400" doc:name="Set Variable" doc:id="77439d1c-8bf3-4ccb-8691-f74a0ed6189b" variableName="httpcode" />
+				<set-variable value="Invalid Data" doc:name="Set Variable1" doc:id="9d65ad00-a0fe-4730-b766-aff7a53114a6" variableName="httpmessage" />
+				<ee:transform doc:name="Transform Message" doc:id="0ca379dc-4efd-4630-a132-5122864d0ab2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorcode : vars.errorcode,
+	errormessage : error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Resource not found",
+	error: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Method not allowed",
+	error: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Not acceptable",
+	error: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Not acceptable",
+	error: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Not acceptable",
+	error: error.detailedDescription
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9bc85fe6-acf8-490a-a7f5-ed3013fd8ddd" type="VALIDATION:INVALID_EMAIL" >
+				<set-variable value="INVEML0001" doc:name="Set-Error-Code" doc:id="2df295a8-c39c-46b4-b50a-2fc8633d13fc" variableName="errorcode" />
+				<set-variable value="400" doc:name="Set Variable" doc:id="c21404c5-3f35-45e7-9c10-122c8f9a441b" variableName="httpcode" />
+				<set-variable value="Invalid Data" doc:name="Set Variable1" doc:id="55f0533d-9fe4-48f4-9c4a-959c96624a64" variableName="httpmessage" />
+				<ee:transform doc:name="Transform Message" doc:id="82c5aee0-58ab-4094-82f0-aa7c2289fb11" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorcode : vars.errorcode,
+	errormessage : error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="HTTP_FORBIDDEN_ERROR" doc:id="68e6f9fa-4ef0-46c3-b70e-b193ca062c33" type="HTTP:FORBIDDEN" >
+				<set-variable value="INVCREDEXT0001" doc:name="Set-Error-Code" doc:id="edf8f44f-0622-4476-8cd1-22e25a4c4b33" variableName="errorcode" />
+				<set-variable value="403" doc:name="Set Variable" doc:id="91088356-285b-44a9-97e6-3b001209f379" variableName="httpcode" />
+				<set-variable value="Invalid Credentials" doc:name="Set Variable1" doc:id="4bedf1b1-1900-4a2b-b2f6-5c419a7bb43b" variableName="httpmessage" />
+				<ee:transform doc:name="Transform Message" doc:id="d09ae872-054a-4396-a806-f1a8fdb8b84a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorcode : vars.errorcode,
+	errormessage : error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			 <on-error-propagate enableNotifications="true" logException="true" doc:name="BAD_REQUEST_COMMON" doc:id="958ec8a2-ca09-4261-a7bd-04605f0cef3b" type="HTTP:BAD_REQUEST" >
+				<set-variable value="INVDATA0001" doc:name="Set-Error-Code" doc:id="7ad7fe9f-f436-4168-a54e-9dabca8c92a5" variableName="errorcode" />
+				<set-variable value="Invalid Data" doc:name="Set Variable1" doc:id="3bf8719b-fb8f-44f2-afb3-5d7204f61bd0" variableName="httpmessage" />
+				<ee:transform doc:name="Transform Message" doc:id="5b97353f-cac3-4dbf-90a7-8257a0b2ea4a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorcode : vars.errorcode,
+	errormessage : error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="19b17cbd-afde-4e97-ba2a-2956a9c364d3" type="HTTP:METHOD_NOT_ALLOWED">
+				<set-variable value="INVDATA0001" doc:name="Set-Error-Code" doc:id="30c8c2a8-b400-4804-9cbd-64236955f9ee" variableName="errorcode" />
+			<set-variable value="405" doc:name="Set Variable" doc:id="10b6e878-e60a-47dd-9a69-5198a0914f9a" variableName="httpcode" />
+			<ee:transform doc:name="Transform Message" doc:id="2beb8e71-cc6c-48a8-80fb-c7fa81b64372" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorcode : vars.errorcode,
+	errormessage : error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+	</error-handler>
+</mule>

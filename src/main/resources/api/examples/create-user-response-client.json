@@ -1,0 +1,14 @@
+{
+  "status": "STAGED",
+  "created": "2013-07-02T21:36:25.344Z",
+  "activated": null,
+  "statusChanged": null,
+  "lastLogin": null,
+  "lastUpdated": "2013-07-02T21:36:25.344Z",
+  "passwordChanged": null,
+  "firstName": "Isaac",
+  "lastName": "Brock",
+  "email": "isaac.brock@example.com",
+  "login": "isaac.brock@example.com",
+  "phone": "555-415-1337"
+}
