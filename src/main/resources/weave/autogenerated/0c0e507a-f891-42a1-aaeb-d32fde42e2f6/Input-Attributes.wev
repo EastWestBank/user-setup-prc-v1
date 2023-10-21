@@ -1,0 +1,30 @@
+%dw 2.0
+
+type auto_0c0e507a_f891_42a1_aaeb_d32fde42e2f6_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|
+    Authorization?: String, 
+    UserVerified?: Boolean
+  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    loginId?: String, 
+    email?: String, 
+    phoneNum?: String
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+

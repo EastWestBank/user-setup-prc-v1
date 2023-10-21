@@ -1,0 +1,12 @@
+{
+  "status" : 400,
+  "errorCode" : "USER0001",
+  "description" : "Api validation failed: login",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "login: An object with this field already exists in the current organization"
+        }
+    ]
+
+}

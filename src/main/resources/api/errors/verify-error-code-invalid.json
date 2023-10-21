@@ -1,0 +1,11 @@
+{
+  "status" : 400,
+  "errorCode" : "USRVERI0001",
+  "description" : "Invalid Passcode/Answer",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "Your token doesn't match our records. Please try again."
+        }
+    ]
+}

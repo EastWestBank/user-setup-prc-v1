@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_2fc1088e_701b_4bf5_9bda_eea9b9458145_Input_Payload = {| loginId: String |}
+

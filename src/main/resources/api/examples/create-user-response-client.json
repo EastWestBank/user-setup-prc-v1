@@ -10,5 +10,5 @@
   "lastName": "Brock",
   "email": "isaac.brock@example.com",
   "login": "isaac.brock@example.com",
-  "phone": "555-415-1337"
+  "mobilePhone": "555-415-1337"
 }

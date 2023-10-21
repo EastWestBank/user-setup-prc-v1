@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_09c173b8_4eb3_4980_b9cf_b8179e56e8c2_Input_Variables_originalPayload = {
+  loginId: String, 
+  factorType: "call" | "sms", 
+  _?: Any
+}
+

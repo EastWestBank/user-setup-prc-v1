@@ -1,0 +1,7 @@
+{
+  "status" : 500,
+  "errorCode" : "USERGEN0001",
+  "description" : "Something went wrong",
+  "errorDetails" : null
+
+}

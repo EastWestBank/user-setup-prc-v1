@@ -1,0 +1,11 @@
+{
+  "status" : 400,
+  "errorCode" : "USERSEARCH0001",
+  "description" : "Invalid search criteria.",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "Invalid search syntax."
+        }
+    ]
+}

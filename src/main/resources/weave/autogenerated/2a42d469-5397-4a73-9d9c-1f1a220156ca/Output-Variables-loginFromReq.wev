@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_2a42d469_5397_4a73_9d9c_1f1a220156ca_Output_Variables_loginFromReq = String
-

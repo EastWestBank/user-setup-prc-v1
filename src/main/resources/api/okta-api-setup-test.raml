@@ -1,21 +1,22 @@
 #%RAML 1.0
-title: okta-api-setup-test
-description:  An orchestrated process APIs to setup a customer profiles for Authentication and MFA verification on Okta.
+title: okta-api-setup-test-v2
+description:  An orchestrated process API to setup a customer profiles for Authentication and MFA verification on Okta.
 
-baseUri: https://devopenapi.velobank.com/api/prc/v1/users
+baseUri: https://devopenapi.velobank.com/api/prc/v1/usermgmt/
 
 types:
   UserSetupRequestClient: !include resources/user-setup-types-client.raml
   UserActivateRequestclient: !include resources/user-activation-types-client.raml
   UserChallengeRequestClient: !include resources/okta-challenge-types.raml
+  UserVerifyRequestClient: !include resources/okta-verify-types.raml
 
 traits:
-  AuthorizationToken: !include resources/okta-user-setup-traits.raml
-  
-/create:
-  description: Use to create user identity record
+  VerificationInfo: !include resources/okta-user-setup-traits.raml
+
+/user:
   post:
-    is: [AuthorizationToken]
+    description: Used to setup user 
+    is: [VerificationInfo]
     body:
       application/json:
         type: UserSetupRequestClient
@@ -25,29 +26,48 @@ traits:
         body:
           application/json:
             example: !include examples/create-user-response-client.json
+     
       400:
         body:
           application/json:
-            example: !include examples/error-response.json
+            examples:
+              UserLoginMissing: !include errors/create-error-res-login-missing.json
+              UserEmailMissing: !include errors/create-error-res-email-missing.json
+              UserExists: !include errors/create-error-res-user-exists.json
+              UserInputMiss: !include errors/create-error-res-missing-req-input.json
 
-/search/{loginid}:
-  description: Use to search any user identity record
+
   get:
-    is: [AuthorizationToken]
+    description: Used to search users based on query params
+    queryParameters:
+      loginId:
+        type: string
+        required: false
+      email:
+        type: string
+        required: false
+      phoneNum:
+        type: string
+        required: false
+
+    is: [VerificationInfo]
     responses:
       200:
         body:
           application/json:
-            example: !include examples/search-user-response-client.json
+            examples: 
+              SearchWithResults: !include examples/search-user-response-with-result-client.json
+              SearchWithNoResults: !include examples/search-user-response-with-no-result-client.json
       400:
         body:
           application/json:
-            example: !include examples/error-response.json
+            examples: 
+              GenericError: !include errors/error-response.json
+              BadSearchFilter: !include errors/search-error-res-bad-search.json
               
-/activate:
-  description: Use to activate user identity record along with password
-  post:
-    is: [AuthorizationToken]
+  put:
+    description: Used to activate user with password
+    is: [VerificationInfo]
     body:
       application/json:
         type: UserActivateRequestclient
@@ -60,44 +80,55 @@ traits:
       400:
         body:
           application/json:
-              example: !include examples/error-response.json
-/challenge:
-  description: Use to request mfa based on client mfa type and user login
-  post:
-    is: [AuthorizationToken]
-    body:
-      application/json:
-        type: UserChallengeRequestClient
-        example: !include examples/challenge-factor-request-client.json
-    responses:
-      200:
-        body:
-            application/json:
-                example: !include examples/challenge-factor-response-client.json
-      400:
-        body:
-          application/json:
-              example: !include examples/error-response.json
+              examples: 
+                GenericError: !include /errors/error-response.json
+                InvalidPwdError: !include /errors/update-pwd-error-res-pwd-rules.json
 
-/verify/{loginid}:
-  description: Use to verify mfa based on factory type coming from client aling with passcode
-  post:
-    is: [AuthorizationToken]
-    body:
-      application/json:
-        type: object
-        properties:
-          passcode:
-            type: string
-            required: true
-        example: !include examples/verify-factor-request-client.json
-    responses:
-      200:
-        body:
+
+  /sendOTP:
+    description: Used to initiate OTP
+    post:
+      
+      description: Same method to handle challge and verify
+      is: [VerificationInfo]
+      body:
+        application/json:
+          type: UserChallengeRequestClient
+          example: !include examples/challenge-factor-request-client.json
+      responses:
+        200:
+          body:
+              application/json:
+                  example: !include examples/challenge-factor-response-client.json
+        400:
+          body:
             application/json:
-                example: !include examples/verify-user-response-client.json
-      400:
-        body:
-          application/json:
-              example: !include examples/error-response.json
-          
+                examples: 
+                  GenericError: !include errors/error-response.json
+                  CodeAlreadySent : !include errors/challenge-code-recent-sent.json
+                  BlankFacInput: !include errors/challenge-error-res-missing-fac.json
+                  MissingProfileInput: !include errors/challenge-error-res-missing-profile.json
+                  NoFactorInput: !include errors/challenge-error-res-no-fac-type.json
+
+  /verifyOTP:
+    description: Used to verify OTP
+    post:
+      
+      description: Same method to handle challge and verify
+      is: [VerificationInfo]
+      body:
+        application/json:
+          type: UserVerifyRequestClient
+          example: !include examples/verify-factor-request-client.json
+      responses:
+        200:
+          body:
+              application/json:
+                  example: !include examples/verify-factor-res-client.json
+        400:
+          body:
+            application/json:
+                examples: 
+                  GenericError: !include errors/error-response.json
+                  InvalidPassCode: !include errors/verify-error-code-invalid.json
+                  InvalidUser: !include errors/verify-error-user-invalid.json

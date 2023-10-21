@@ -1,0 +1,12 @@
+{
+  "status" : 400,
+  "errorCode" : "USER0003",
+  "description" : "Api validation failed: login",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "login: The field cannot be left blank"
+        }
+    ]
+
+}

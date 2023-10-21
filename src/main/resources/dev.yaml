@@ -1,9 +1,17 @@
-enc:
-  key: "![jiStGO29MyY=]"
-  algorithm: "![SVM+dMU4kJkLYPx1FAuJ3w==]"
-  mode: "![EmRDUufWylA=]"
-
 extidpnfo:
   authkey: "![fumtN3XDl3r5lUzNJF9q/Osz4TfFM+3lR2f2slZ+EW8+WtqvtpyGVaKKlXlORavT]"
   url: velobank.oktapreview.com
-
+ 
+errorcodes:
+  user:
+    E0000001: "USER0001"
+    E0000031: "USERSEARCH0001"
+  useract:
+    E0000001: "USER0003"
+  factor:
+    E0000109: "USRCHA0004"
+    E0000001: "USRCHA0002"
+    E0000003: "USRCHA0003"
+    E0000068: "USRVERI0001"
+    
+  

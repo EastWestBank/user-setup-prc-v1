@@ -1,0 +1,6 @@
+{
+  "status" : 400,
+  "errorCode" : "USER0002",
+  "description" : "required key [email] not found.",
+  "errorDetails" : null
+}

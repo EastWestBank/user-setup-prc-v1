@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
-http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
-    <http:listener-config name="okta-api-setup-test-httpListenerConfig" basePath="/api/prc">
-        <http:listener-connection host="0.0.0.0" port="8091"/>
+    <http:listener-config name="okta-api-setup-test-httpListenerConfig" basePath="/api/prc/v1">
+        <http:listener-connection host="0.0.0.0" port="8091" />
     </http:listener-config>
     <apikit:config name="okta-api-setup-test-config" api="okta-api-setup-test.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <configuration-properties doc:name="Configuration properties" doc:id="e8162d87-74c9-40aa-8684-7994268ce714" file="dev.yaml" />
-	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="f5c680d4-f77c-496c-83c1-a4fc7a0fc1f2" file="dev.yaml" key="EWBC" >
-		<secure-properties:encrypt algorithm="Blowfish"/>
-	</secure-properties:config>
-	<http:request-config name="HTTP_Request_configuration-common" doc:name="HTTP Request configuration" doc:id="cafb6259-f87b-4588-bdbb-84e0849cc519" basePath="/api/v1" >
-		<http:request-connection protocol="HTTPS" host="${extidpnfo.url}" />
+    <http:request-config name="Okta-http-req-config-common" doc:name="HTTP Request configuration" doc:id="f8623818-c6bd-4aa6-924e-3ff599b4ebe9" basePath="/api/v1" >
+		<http:request-connection protocol="HTTPS" host="velobank.oktapreview.com" />
+		<http:default-headers >
+			<http:default-header key="Authorization" value="SSWS ${secure::extidpnfo.authkey}" />
+		</http:default-headers>
 	</http:request-config>
-	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="9e19ccdf-915b-42e9-8295-cf8afd2b13c6"/>
-	<api-gateway:autodiscovery apiId="19020380" ignoreBasePath="false" doc:name="API Autodiscovery" doc:id="b004c28d-40cc-48ae-b9ab-51b3e0ed5b82" flowRef="okta-api-setup-test-main" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="a515f19a-46e5-4b25-b641-11ff3923412e" file="dev.yaml" key="EWBC">
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="d1c83c36-10ba-4202-a6aa-c8495d24b696" file="dev.yaml" />
 	<flow name="okta-api-setup-test-main">
-        <http:listener config-ref="okta-api-setup-test-httpListenerConfig" path="/v1/*">
-            <http:response statusCode="#[vars.httpStatus default 200]">
+        <http:listener config-ref="okta-api-setup-test-httpListenerConfig" path="/usermgmt/*">
+            <http:response statusCode="#[vars.httpStatusCode default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
-            <http:error-response statusCode="#[vars.httpcode default 500]" reasonPhrase='#[vars.httpmessage default "unknown"]'>
+            <http:error-response statusCode="#[vars.httpStatusCode default 500]">
                 <http:body><![CDATA[#[payload]]]></http:body>
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="okta-api-setup-test-config" />
-		<error-handler ref="okta-commom-error-handlerError_Handler"/>
-		
-        
+        <error-handler ref="global-error-handler">
+            
+        </error-handler>
     </flow>
     <flow name="okta-api-setup-test-console">
         <http:listener config-ref="okta-api-setup-test-httpListenerConfig" path="/console/*">
@@ -58,4 +59,496 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
+    <flow name="get:\user:okta-api-setup-test-config" doc:id="0c0e507a-f891-42a1-aaeb-d32fde42e2f6" tracking:enable-default-events="true">
+        <logger level="INFO" doc:name="Logger" doc:id="cc02d503-c556-47ca-ac5e-b6d4a0d8153c" message="##### BEFORE USER SEARCH FLOW #####" />
+		<choice doc:name="Choice" doc:id="b3832293-6bb9-4d99-9d09-6fbb542b9dbf" >
+			<when expression="isEmpty(payload)">
+				<logger level="INFO" doc:name="SET QUERY PARAMS TO PAYLAOD" doc:id="dfe28488-e15b-464d-a468-d388cfb43b37" message="BEFORE TRANSFORM QUERY PARAMS TO PAYLOAD"/>
+				<ee:transform doc:name="Transform Message" doc:id="9bd71ee6-6def-4baa-b10d-834bb8ef3994" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"loginId" : attributes.queryParams.loginId,
+	"email" : attributes.queryParams.email,
+	"phoneNum" : attributes.queryParams.phoneNum,
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="64c6894f-835f-4d2b-8f42-98c99838ff0d" message="NO NEED TO TRANSFORM"/>
+			</otherwise>
+		</choice>
+		<set-variable value='#[%dw 2.0&#10;output application/json&#10;&#10;var loginid=if(!isEmpty(payload.loginId)) payload.loginId else "" default ""&#10;var email=if(!isEmpty(payload.email)) payload.email else "" default ""&#10;var phone=if(!isEmpty(payload.phoneNum)) trim(payload.phoneNum) else "" default ""&#10;var finalPhone = if(phone startsWith("+") ) phone replace "+" with "%2B" else  "%2B"++ phone default ""&#10;var finalVal = if(!isEmpty(loginid)) loginid else email default ""&#10;---&#10;"profile.login eq %22" ++ loginid ++ "%22 OR profile.email eq %22" ++ email ++ "%22 OR profile.mobilePhone eq %22" ++ finalPhone ++ "%22" default ""]' doc:name="Set Search Var" doc:id="4d84addb-94ad-419e-9014-2943ad7fd980" variableName="searchBy"/>
+		<http:request method="GET" doc:name="okta-search-request" doc:id="709967fe-8567-4b50-a8af-f28bd00041b5" config-ref="Okta-http-req-config-common" path='#["/users?search=" ++ vars.searchBy]' sendBodyMode="NEVER">
+			<http:response-validator >
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="ab671cb8-6f75-489a-b0bb-1ab8f89501b1" variableName="httpStatusCode" />
+		<choice doc:name="Choice" doc:id="537f88fd-30f2-4c13-a2cf-373fa1ebbe4a" >
+			<when expression="#[attributes.statusCode == 200]">
+				<logger level="INFO" doc:name="Logger" doc:id="7bede016-e50c-41a8-bff0-63fe7a153858" message="### EXT CALL RESPONSE ### #[payload]" />
+				<ee:transform doc:name="Transform Message" doc:id="c7649da9-7c64-4edd-815f-bc928970aa5a">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	extId: payload01.id,
+	status: payload01.status,
+	created: payload01.created,
+	activated: payload01.activated,
+	statusChanged: payload01.statusChanged,
+	lastLogin: payload01.lastLogin,
+	lastUpdated: payload01.lastUpdated,
+	passwordChanged: payload01.passwordChanged,
+	firstName: payload01.profile.firstName,
+	lastName: payload01.profile.lastName,
+	email: payload01.profile.email,
+	login: payload01.profile.login,
+	mobilePhone: payload01.profile.mobilePhone
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="9a0f7cdc-ed7b-42fe-885f-4189e40ab051" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.user.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+    </flow>
+	<flow name="post:\user:application\json:okta-api-setup-test-config" tracking:enable-default-events="true">
+        <logger level="INFO" doc:name="Logger" doc:id="3d821354-51ac-4b36-9c35-fabb90bb8dfd" message="##### BEFORE USER CREATE FLOW #####" />
+		<set-payload value='#[{&#10;  "profile": {&#10;    "email" : payload.email,&#10;    "login": payload.loginId,&#10;    "mobilePhone": payload.phone&#10;  }&#10;}]' doc:name="Set Payload" doc:id="76b224bb-2934-46b9-a3a8-9c6e36894dde" />
+		<http:request method="POST" doc:name="Request" doc:id="c449d6c9-2b19-4f89-95bb-9b17dadd6057" config-ref="Okta-http-req-config-common" path="/users?activate=false">
+				<http:response-validator>
+					<http:success-status-code-validator values="200,400,403" />
+				</http:response-validator>
+			</http:request>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="f829fe38-5ce3-46ec-a4c1-0836b71139bd" variableName="createResponse"/>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="f4460996-c93a-4044-8c5e-caf99ce5dba8" variableName="httpStatusCode" />
+		<choice doc:name="Choice" doc:id="6aabf797-b1bf-4786-9415-b5ecefc34080" >
+			<when expression="#[attributes.statusCode == 200]">
+				<ee:transform doc:name="Transform Message" doc:id="b2007b2b-b6f3-4cb2-853d-f3c7b31680ab">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: payload.status,
+	created: payload.created,
+	activated: payload.activated,
+	statusChanged: payload.statusChanged,
+	lastLogin: payload.lastLogin,
+	lastUpdated: payload.lastUpdated,
+	passwordChanged: payload.passwordChanged,
+	firstName: payload.profile.firstName,
+	lastName: payload.profile.lastName,
+	email: payload.profile.email,
+	login: payload.profile.login,
+	mobilePhone: payload.profile.mobilePhone
+}
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+				<async doc:name="Async" doc:id="0229bb74-bfc1-48f9-a043-46d4dc6aff2d" >
+					<set-payload value='#[{&#10;	"userId" : vars.createResponse.id&#10;}]' doc:name="Set Payload" doc:id="31a537e1-ef34-4e92-bc21-ca78e77a3269" />
+					<flow-ref doc:name="Flow Reference" doc:id="f53cfc11-4567-4c3b-b7e2-2ec9ac072241" name="okta-user-activate-flow" />
+				</async>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="04788a32-5733-43f6-b7a2-96cb9658d64a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.user.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+    </flow>
+	<flow name="put:\user:application\json:okta-api-setup-test-config" tracking:enable-default-events="true">
+        <logger level="INFO" doc:name="Logger" doc:id="640876e7-78d4-440d-8cc2-841d434ccc95" message="##### BEFORE USER PWD SETUP FLOW #####" />
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="4691bf65-0ec5-43ab-9f02-d0d10c1576e0" variableName="originalPayload"/>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"loginId" : payload.loginId&#10;}]' doc:name="Set Payload" doc:id="0ff65a7b-5a21-4fe3-bc2e-62e2bdb10efa" />
+		<flow-ref doc:name="Invoke User Search Flow" doc:id="4cb8cdb8-813e-4cb0-8799-fcfc5725ed7e" name="get:\user:okta-api-setup-test-config" target="searchResponse"/>
+		<choice doc:name="Choice" doc:id="a0fb8f33-28a0-497b-a543-8f830124be9b" >
+			<when expression="!isEmpty(vars.searchResponse)">
+				<set-payload value='#[%dw 2.0&#10;&#10;output application/json&#10;&#10;---&#10;{&#10;  "credentials": {&#10;    "password" : &#10;    { &#10;        "value": vars.originalPayload.password &#10;    }&#10;  }&#10;}]' doc:name="Set Payload" doc:id="0d992446-dad4-414b-a606-08c5fc6cc1a7" />
+				<http:request method="PUT" doc:name="Request" doc:id="f71e8c48-ec87-4240-a196-943d6b8c5589" config-ref="Okta-http-req-config-common" path='#["/users/"++ vars.originalPayload.loginId]'>
+			<http:response-validator>
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+				<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="159dbd5c-94b2-4260-94d6-f22d1a7f812c" variableName="httpStatusCode" />
+				<choice doc:name="Choice" doc:id="b887718d-9bdc-48a5-bebe-854cf8e42809">
+			<when expression='#[attributes.statusCode == 200 and payload.status == "ACTIVE"]'>
+				<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  extId: payload.id,
+  status: "success",
+  description: "User activation has been initiated"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			</when>
+			<when expression='attributes.statusCode == 200 and payload.status == "STAGED"'>
+				<ee:transform doc:name="Transform Message" doc:id="a5ec5648-ad02-4a88-8d1c-6380629fe776">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"userId" : payload.id
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="Invoike User Activate Flow" doc:id="09635455-85d9-4b4a-9247-fd9b76caaa2a" name="okta-user-activate-flow" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="1c7ff7d5-b833-4839-a4e2-06adadf92482">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.useract.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+			</when>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9349fe7b-39b4-4b9c-9200-9948ed37eba9" >
+				<ee:transform doc:name="Transform Message" doc:id="6ee94191-ce18-4107-a51d-ea918bb37506" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "status" : 400,
+  "errorCode" : error.errorMessage,
+  "description" : error.description,
+  "errorDetails" : error.childErrors
+
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+	<flow name="post:\user\sendOTP:application\json:okta-api-setup-test-config" tracking:enable-default-events="true">
+        <logger level="INFO" doc:name="Logger" doc:id="a9530343-4cb3-4443-935a-c1396956f6cd" message="##### BEFORE INITIATE OTP FLOW #####" />
+		<set-variable value="#[payload]" doc:name="Set OriginalPayload" doc:id="543ec76a-73d5-415b-9a83-4da9116d49e6" variableName="originalPayload"/>
+		
+		<set-variable value="challenge" doc:name="Set Variable" doc:id="739accd8-822b-4c32-8da4-5af9950dc117" variableName="factorAction"/>
+		<flow-ref doc:name="Flow Reference" doc:id="7f86a134-a0b1-4a10-8b58-7cbe03254f7a" name="okta-factor-verify-or-challenge-common-flow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="97379a71-1543-48d8-847f-c28e7e0ca97a" message="AFTER SEARCH RESPONSE #### #[payload]"/>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		
+    </flow>
+	<flow name="post:\user\verifyOTP:application\json:okta-api-setup-test-config" tracking:enable-default-events="true">
+        <logger level="INFO" doc:name="Logger" doc:id="2976f102-ddc8-4047-863f-901748dfc1e7" message="##### BEFORE OPT VERIFY FLOW #####" />
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="ddedd3de-e4d7-4e28-ba77-68463eb78305" variableName="originalPayload"/>
+		<set-variable value="verify" doc:name="Set Variable" doc:id="f802d4be-53eb-407d-9aeb-7866b3faf8b7" variableName="factorAction"/>
+		<flow-ref doc:name="Flow Reference" doc:id="99a9d461-ea6d-419e-be3b-6fc883f69fad" name="okta-factor-verify-or-challenge-common-flow"/>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="okta-list-factors-flow" doc:id="2fc1088e-701b-4bf5-9bda-eea9b9458145" tracking:enable-default-events="true">
+		<http:request method="GET" doc:name="Request" doc:id="6bbbaee7-bcc4-4840-ac74-2ee50b84d1e8" config-ref="Okta-http-req-config-common" path="/users/{userId}/factors">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	userId : vars.userInfo.userId
+}]]]></http:uri-params>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="ccd072e9-bc22-4796-b47c-e8d265920d94" variableName="httpStatusCode" />
+		<choice doc:name="Choice" doc:id="a53f4ade-d87a-4436-8083-f07d6fe73a35" >
+			<when expression="#[attributes.statusCode == 200]">
+				<ee:transform doc:name="Transform Message" doc:id="912105d1-d9ea-4f89-941c-1f4b3a9b3220">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var reqRec = payload filter ((item, index) -> item.factorType == vars.originalPayload.factorType )
+
+---
+reqRec[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="c6c36564-4f22-4184-9e37-29f5e56f2ea2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.factor.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="okta-factor-verify-or-challenge-common-flow" doc:id="09c173b8-4eb3-4980-b9cf-b8179e56e8c2" tracking:enable-default-events="true">
+	
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;---&#10;{&#10;	"loginId" : payload.loginId&#10;}]' doc:name="Set Search Payload" doc:id="178b0510-d4ce-4106-a78c-ec4daed5dd2c" />
+		<flow-ref doc:name="Invoke Search User Flow" doc:id="e21f26b6-195c-4c0e-9b02-2537175704b8" name="get:\user:okta-api-setup-test-config" target="searchResponse"/>
+		<choice doc:name="Choice" doc:id="837b5441-58f6-4340-88e4-9051c206a9ef" >
+			<when expression="!isEmpty(vars.searchResponse)">
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;&#10;var reqRec = vars.searchResponse filter ((item, index) -&gt; item.login == vars.originalPayload.loginId )&#10;&#10;---&#10;{&#10;	userId : reqRec.extId[0],&#10;	phone : reqRec.mobilePhone[0]&#10;}]" doc:name="Set Variable" doc:id="2b5e9f07-b1b6-4737-a46e-c360ab2a5753" variableName="userInfo"/>
+				<flow-ref doc:name="Invoke Factors List" doc:id="6341ce87-67bc-48f9-8120-ae317a122a07" name="okta-list-factors-flow" target="factorsResponse"/>
+				<logger level="INFO" doc:name="Logger" doc:id="27ec0353-304d-417c-991d-88eaafb2afe9" message="### FACTORS PAYLOAD #### # #[vars.factorsResponse]" />
+				<choice doc:name="Choice" doc:id="16a812e8-c440-4be7-8f21-c00a6da7bde5" >
+					<when expression='!isEmpty(vars.factorsResponse) and vars.factorsResponse.status == "ACTIVE" and vars.factorAction == "challenge"'>
+						<set-variable value='#[%dw 2.0&#10;&#10;&#10;var status = if(!isEmpty(vars.factorsResponse)) vars.factorsResponse.status else null&#10;var verPath = if(!isEmpty(vars.factorsResponse) and vars.factorsResponse.status == "ACTIVE") "/users/" ++ vars.userInfo.userId ++ "/factors/"++ vars.factorsResponse.id ++ "/verify" else "/users/" ++ vars.userInfo.userId ++ "/factors/"++ vars.factorsResponse.id ++ "/lifecycle/activate"&#10;---&#10;{&#10;	"facStatus" : status,&#10;	"path" : verPath&#10;}]' doc:name="Set Variable" doc:id="d8813f1c-ac53-41bb-b27d-1f216771bc8e" variableName="verifyCallInput" />
+						<logger level="INFO" doc:name="Logger" doc:id="cf838db0-dd17-41f2-a47d-9729001fc757" message="### EXISTING FACTOR STATUS ##### #[vars.factorsResponse.status]"/>
+						<set-payload value="#[null]" doc:name="Set Payload" doc:id="cad8582e-ba5b-4bd6-a94b-e2c8a4bb0cb0" />
+						<http:request method="POST" doc:name="Request" doc:id="2babf9ad-033b-4632-b69f-be9f929525b5" config-ref="Okta-http-req-config-common" path="/users/{userId}/factors/{factorId}/verify">
+							<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	factorId : vars.factorsResponse.id,
+	userId : vars.userInfo.userId
+}]]]></http:uri-params>
+							<http:response-validator >
+								<http:success-status-code-validator values="200,400,403,429" />
+							</http:response-validator>
+						</http:request>
+						<ee:transform doc:name="Transform Message" doc:id="9a270369-c101-4097-92ff-d32d8b096c77" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "factorResult": payload.factorResult,
+    "userId" : vars.userInfo.userId
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<when expression='isEmpty(vars.factorsResponse) or ( !isEmpty(vars.factorsResponse) and vars.factorsResponse.status=="PENDING_ACTIVATION" and  vars.factorAction == "challenge")'>
+						<set-payload value='#[%dw 2.0&#10;---&#10;&#10;{&#10;  "factorType": vars.originalPayload.factorType,&#10;  "provider": "OKTA",&#10;  "profile": {&#10;    "phoneNumber": vars.userInfo.phone&#10;  }&#10;}]' doc:name="Set Payload" doc:id="35a53974-42b3-40e5-a326-e732d109f355" />
+						<flow-ref doc:name="Invoke Enroll/UpdatePhone Factors" doc:id="27ff50ca-2bb8-4b19-915a-d2d5188337f9" name="okta-enroll-or-update-factors-flow" />
+						<ee:transform doc:name="Transform Message" doc:id="041ae0f3-dd31-468b-9672-cb68b2b44d71" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "factorResult": payload.factorResult,
+    "userId" : vars.userInfo.userId
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<when expression='!isEmpty(vars.factorsResponse) and vars.factorAction == "verify"'>
+						<set-variable value='#[%dw 2.0&#10;&#10;&#10;var status = if(!isEmpty(vars.factorsResponse)) vars.factorsResponse.status else null&#10;var verPath = if(!isEmpty(vars.factorsResponse) and vars.factorsResponse.status == "ACTIVE") "/users/" ++ vars.userInfo.userId ++ "/factors/"++ vars.factorsResponse.id ++ "/verify" else "/users/" ++ vars.userInfo.userId ++ "/factors/"++ vars.factorsResponse.id ++ "/lifecycle/activate"&#10;---&#10;{&#10;	"facStatus" : status,&#10;	"path" : verPath&#10;}]' doc:name="Set Variable" doc:id="0df1bdc5-ad4a-40f4-a5b7-4db0f2666133" variableName="verifyCallInput" />
+						<logger level="INFO" doc:name="Logger" doc:id="0abc5dd7-a332-443b-a512-b3909a0553a4" message="##### INSIDE VERIFY #####" />
+						<set-payload value='#[{&#10;	"passCode" : vars.originalPayload.passcode&#10;}]' doc:name="Set Payload" doc:id="c6698ce0-c752-4918-b033-4008fafac189" />
+						<logger level="INFO" doc:name="Logger" doc:id="d69735d9-7bae-4402-bcf6-70ea3ead2d04" message="#### VERIFY INPUT ###### #[vars.verifyCallInput]"/>
+						<flow-ref doc:name="Flow Reference" doc:id="1330fb71-33a8-45b6-937d-793fe5ce8d68" name="okta-factor-verify-flow"/>
+						<choice doc:name="Choice" doc:id="9a2c2e9d-2536-406f-a6af-9bd3c378c3c2" >
+							<when expression="vars.httpStatusCode == 200">
+								<ee:transform doc:name="Transform Message" doc:id="4447d8d0-52ab-4dab-9e45-bb98dfa0cc11">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "factorResult": payload.factorResult,   
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+							</when>
+							<otherwise >
+								<ee:transform doc:name="Transform Message" doc:id="8cbd0464-e38a-4d79-8892-f8905b1ca036" >
+									<ee:message >
+										<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+							</otherwise>
+						</choice>
+					</when>
+					<otherwise>
+						<raise-error doc:name="Raise error" doc:id="1efa0387-234b-43ee-b3e8-d387ebc83f96" type="REF:FACTORS_NOT_FOUND"/>
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise >
+				<raise-error doc:name="Raise error" doc:id="0f913056-e209-4466-9154-56c4b1a4626f" type="REF:OKTA_USER_NOT_FOUND" description="Okta users not available customer exception"/>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5400fc9f-ac48-40b3-b80a-8aa98b9b758e" type="HTTP:FORBIDDEN">
+				<ee:transform doc:name="Transform Message" doc:id="709249fe-80fe-4c9c-bb5e-a1f6c0b097ac" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "status" : 400,
+  "errorCode" : "USERINV0001",
+  "description" : error.description,
+  "errorDetails" : error.childErrors
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="okta-enroll-or-update-factors-flow" doc:id="c8bdf898-c78a-414c-b7d9-6edb6e14b279" tracking:enable-default-events="true">
+		<http:request method="POST" doc:name="Request" doc:id="6f7e07c9-9c63-4440-98f7-89fa2d9fe9a1" config-ref="Okta-http-req-config-common" path="/users/{userId}/factors?activate=false&amp;?updatePhone=true">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	userId : vars.userInfo.userId
+}]]]></http:uri-params>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="40a26a4a-4202-41e8-be7e-6f63210f9ef6" variableName="httpStatusCode" />
+		<choice doc:name="Choice" doc:id="09362be6-ac61-49e4-829e-14866bc063f3" >
+			<when expression="#[attributes.statusCode == 200]">
+				<ee:transform doc:name="Transform Message" doc:id="f267656f-6c8f-4ac4-9850-0c29a76550fb" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"factorResult" : "SUCCESS"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="4871abc8-8e8d-4cb9-843b-f64b46e52a97" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.factor.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="72ea2cbb-7afb-49ae-a2b0-ce01ce322545" message="### AFTER ENROLL FACTOR ####: #[payload]"/>
+	</flow>
+	<flow name="okta-factor-verify-flow" doc:id="87a565f3-295f-4002-9026-adba6642a22c" tracking:enable-default-events="true">
+		<http:request method="POST" doc:name="Request" doc:id="91502169-f90c-43a8-9422-4abc73830b12" config-ref="Okta-http-req-config-common" path='#[vars.verifyCallInput.path]'>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="e6d9b6b1-88fe-419b-b881-6d0341cf60a3" variableName="httpStatusCode" />
+		<choice doc:name="Choice" doc:id="0c994adc-537c-4335-9511-50139e9b341c" >
+			<when expression="#[attributes.statusCode == 200]" >
+				<ee:transform doc:name="Transform Message" doc:id="6c47d4d5-9ba1-444c-b98c-5a206ac4f4f4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"factorResult" : "SUCCESS"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="104c3fa3-c996-47b1-b73f-26234c803143" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var eCode = p('errorcodes.factor.' ++ payload.errorCode)
+---
+{
+  "status" : attributes.statusCode,
+  "errorCode" : eCode,
+  "description" : payload.errorSummary,
+  "errorDetails" : payload.errorCauses
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="b694ea63-6354-4ccb-ab6b-51900c1372ac" message="### AFTER VERIFY FACTOR:  #### #[payload]" />
+	</flow>
+	<flow name="okta-user-activate-flow" doc:id="d3d69c11-9fbb-4843-b1a8-ca78d73f71bc" >
+		<http:request method="POST" doc:name="Request" doc:id="406f14b6-1c4e-4633-a9a2-f688697b14dd" config-ref="Okta-http-req-config-common" path="/users/{userId}/lifecycle/activate?sendEmail=false">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	userId : payload.userId
+}]]]></http:uri-params>
+			<http:response-validator >
+				<http:success-status-code-validator values="200,400,403" />
+			</http:response-validator>
+		</http:request>
+		<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="c88700ba-c708-4531-a2e2-a2f3e2639485" variableName="httpStatusCode" />
+		<logger level="INFO" doc:name="Logger" doc:id="98e480f4-4c5a-428a-ab56-43e3042ba48d" message="### POST ACTIVATE LIFE CYCLE #### #[payload]"/>
+	</flow>
 </mule>

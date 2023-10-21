@@ -1,0 +1,17 @@
+%dw 2.0
+
+type auto_d3d69c11_9fbb_4843_b1a8_ca78d73f71bc_Input_Payload = {|
+  status: String, 
+  created: String, 
+  activated: Null, 
+  statusChanged: Null, 
+  lastLogin: Null, 
+  lastUpdated: String, 
+  passwordChanged: Null, 
+  firstName: String, 
+  lastName: String, 
+  email: String, 
+  login: String, 
+  mobilePhone: String
+|}
+

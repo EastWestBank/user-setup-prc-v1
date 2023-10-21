@@ -1,0 +1,16 @@
+#%RAML 1.0 DataType
+
+type: object
+properties:
+  loginId:
+    type: string
+    required: true
+  passcode:
+    type: string
+    required: false
+  factorType:
+    type: string
+    required: true
+    enum:
+      - sms
+      - call

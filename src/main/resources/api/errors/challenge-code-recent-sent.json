@@ -1,0 +1,6 @@
+{
+  "status" : 400,
+  "errorCode" : "USRCHA0004",
+  "description" : "An SMS message was recently sent. Please wait 30 seconds before trying again.",
+  "errorDetails" : null
+}

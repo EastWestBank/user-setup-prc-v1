@@ -1,4 +1,4 @@
 {
   "loginId" : "test@test.com",
-  "type" : "sms"
+  "factorType" : "sms"
 }

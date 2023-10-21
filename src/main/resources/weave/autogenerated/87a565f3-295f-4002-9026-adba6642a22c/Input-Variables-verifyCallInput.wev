@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_87a565f3_295f_4002_9026_adba6642a22c_Input_Variables_verifyCallInput = {|
+  facStatus: Any, 
+  path: Any
+|}
+

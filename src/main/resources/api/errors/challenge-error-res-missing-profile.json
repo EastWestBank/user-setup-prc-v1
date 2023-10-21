@@ -1,0 +1,11 @@
+{
+  "status" : 400,
+  "errorCode" : "USRCHA0001",
+  "description" : "Api validation failed: factorEnrollRequest",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "Invalid Profile."
+        }
+    ]
+}

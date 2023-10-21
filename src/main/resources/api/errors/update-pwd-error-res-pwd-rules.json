@@ -1,0 +1,12 @@
+{
+  "status" : 400,
+  "errorCode" : "USER0003",
+  "description" : "Api validation failed: password",
+  "errorDetails" : 
+    [
+        {
+            "errorSummary": "password: Password requirements were not met. Password requirements: at least 8 characters, a lowercase letter, an uppercase letter, a number."
+        }
+    ]
+
+}
